@@ -1,0 +1,324 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+    return [{ params: {} }];
+}
+
+const visaItems = await getCollection('visa');
+
+const sortedItems = [...visaItems].sort((a, b) => {
+    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+});
+
+const categories = [...new Set(sortedItems.map(item => item.data.category))];
+---
+
+<Layout title="签证政策 - 加拿大">
+    <div class="visa-list">
+        <header class="page-header">
+            <h1>加拿大签证政策</h1>
+            <p>自动采集自加拿大政府官网，及时了解最新签证动态</p>
+        </header>
+
+        <div class="disclaimer-banner">
+            <p>⚠️ <strong>重要提示:</strong> 本网站内容仅供参考，签证政策请以加拿大政府官方发布为准。</p>
+        </div>
+
+        <div class="filter-section">
+            <span class="filter-label">分类:</span>
+            <button class="filter-btn active" data-category="all">全部</button>
+            {categories.map(cat => (
+                <button class="filter-btn" data-category={cat}>{cat}</button>
+            ))}
+        </div>
+
+        <div class="stats">
+            <span>共 <strong>{sortedItems.length}</strong> 条政策信息</span>
+        </div>
+
+        <ul class="items-container">
+            {sortedItems.map(item => (
+                <li class="visa-card" data-category={item.data.category}>
+                    <a href={`/visa/${item.id}`}>
+                        <div class="card-header">
+                            <span class="category-tag">{item.data.category}</span>
+                            <div class="header-right">
+                                {item.data.language && (
+                                    <span class={`lang-tag lang-${item.data.language}`}>
+                                        {item.data.language === 'zh' ? '中文' : 'EN'}
+                                    </span>
+                                )}
+                                <span class="date-tag">{typeof item.data.date === 'object' ? item.data.date.toISOString().split('T')[0] : item.data.date}</span>
+                            </div>
+                        </div>
+                        <h3 class="card-title">{item.data.title}</h3>
+                        {item.data.summary && (
+                            <p class="card-summary">{item.data.summary}</p>
+                        )}
+                        <div class="card-footer">
+                            <span class="source">{item.data.source}</span>
+                            <span class="read-more">阅读更多 →</span>
+                        </div>
+                    </a>
+                </li>
+            ))}
+        </ul>
+
+        {sortedItems.length === 0 && (
+            <div class="empty-state">
+                <p>暂无签证政策信息，请稍后再试。</p>
+                <button onclick="window.location.reload()">刷新页面</button>
+            </div>
+        )}
+    </div>
+</Layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.visa-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const category = btn.dataset.category;
+
+                cards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<style>
+    .visa-list {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #1a1a2e;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        color: #6b7280;
+    }
+
+    .disclaimer-banner {
+        background-color: #fff1f2;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+
+    .filter-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .filter-btn.active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .stats {
+        margin-bottom: 1.5rem;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .items-container {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .visa-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .visa-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .visa-card a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        padding: 1.5rem;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .lang-tag {
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .lang-en {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .lang-zh {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .category-tag {
+        padding: 0.25rem 0.75rem;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .date-tag {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .card-title {
+        font-size: 1.15rem;
+        margin-bottom: 0.75rem;
+        color: #1f2937;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-summary {
+        font-size: 0.9rem;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .source {
+        font-size: 0.85rem;
+        color: #10b981;
+        font-weight: 500;
+    }
+
+    .read-more {
+        font-size: 0.85rem;
+        color: #3b82f6;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        color: #6b7280;
+    }
+
+    .empty-state button {
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .empty-state button:hover {
+        background-color: #2563eb;
+    }
+
+    @media (max-width: 768px) {
+        .visa-list {
+            padding: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .items-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

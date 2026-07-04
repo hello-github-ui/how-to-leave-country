@@ -18,3 +18,9 @@
 **/.mvn/
 **/mvnw/
 **/mvnw.cmd
+
+# Crawler
+**/storage/
+**/.astro/
+**/dist/
+crawler/src/content/

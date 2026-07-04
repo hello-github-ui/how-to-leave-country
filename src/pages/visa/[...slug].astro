@@ -1,0 +1,213 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+    const visaItems = await getCollection('visa');
+    return visaItems.map(item => ({
+        params: { slug: item.id },
+        props: { item },
+    }));
+}
+
+export interface Props {
+    item: Awaited<ReturnType<typeof getCollection>>[0];
+}
+
+const { item } = Astro.props;
+---
+
+<Layout title={item.data.title}>
+    <article class="visa-detail">
+        <header class="visa-header">
+            <h1>{item.data.title}</h1>
+            <div class="visa-meta">
+                <span class="category">{item.data.category}</span>
+                {item.data.language && (
+                    <span class={`lang lang-${item.data.language}`}>
+                        {item.data.language === 'zh' ? '中文' : 'English'}
+                    </span>
+                )}
+                <span class="date">{typeof item.data.date === 'object' ? item.data.date.toISOString().split('T')[0] : item.data.date}</span>
+                <span class="source">{item.data.source}</span>
+            </div>
+        </header>
+
+        {item.data.summary && (
+            <div class="summary">
+                <strong>摘要:</strong> {item.data.summary}
+            </div>
+        )}
+
+        <div class="visa-content">
+            {item.body}
+        </div>
+
+        <footer class="visa-footer">
+            <div class="disclaimer">
+                <p>⚠️ <strong>免责声明:</strong> 本页面内容由爬虫自动采集，仅供参考。签证政策请以官方发布为准。</p>
+            </div>
+            <div class="source-link">
+                <a href={item.data.url} target="_blank" rel="noopener noreferrer">
+                    📎 查看原文（加拿大政府官网）
+                </a>
+            </div>
+        </footer>
+    </article>
+</Layout>
+
+<style>
+    .visa-detail {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .visa-header h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #1a1a2e;
+        line-height: 1.3;
+    }
+
+    .visa-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .visa-meta span {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+    }
+
+    .category {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .date {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .source {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .lang {
+        font-weight: 600;
+    }
+
+    .lang-en {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .lang-zh {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .summary {
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+        color: #92400e;
+    }
+
+    .visa-content {
+        line-height: 1.8;
+        color: #374151;
+        font-size: 1.05rem;
+    }
+
+    .visa-content p {
+        margin-bottom: 1rem;
+    }
+
+    .visa-content h2 {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+
+    .visa-content h3 {
+        font-size: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: #374151;
+    }
+
+    .visa-content ul, .visa-content ol {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .visa-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .visa-content a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .visa-content a:hover {
+        text-decoration: underline;
+    }
+
+    .visa-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .disclaimer {
+        background-color: #fff1f2;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: #991b1b;
+        font-size: 0.9rem;
+    }
+
+    .source-link a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #3b82f6;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .source-link a:hover {
+        background-color: #2563eb;
+    }
+
+    @media (max-width: 768px) {
+        .visa-detail {
+            padding: 1rem;
+        }
+
+        .visa-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .visa-meta {
+            flex-direction: column;
+        }
+    }
+</style>

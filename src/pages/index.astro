@@ -1,11 +1,363 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const visaItems = await getCollection('visa');
+const recentItems = [...visaItems]
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+    .slice(0, 5);
+
+const lastUpdate = visaItems.length > 0 
+    ? new Date(Math.max(...visaItems.map(i => new Date(i.data.date).getTime()))).toLocaleDateString('zh-CN')
+    : '暂无数据';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="签证政策监控">
+    <div class="homepage">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>签证政策监控</h1>
+                <p>自动采集各国大使馆签证信息，及时了解最新政策变化</p>
+                <div class="cta-buttons">
+                    <a href="/visa" class="btn-primary">查看加拿大签证</a>
+                    <a href="#about" class="btn-secondary">了解更多</a>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{visaItems.length}</span>
+                    <span class="stat-label">政策条目</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">国家</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{lastUpdate}</span>
+                    <span class="stat-label">最近更新</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="recent-section">
+            <h2>最新政策</h2>
+            {recentItems.length > 0 ? (
+                <ul class="recent-list">
+                    {recentItems.map(item => (
+                        <li class="recent-item">
+                            <a href={`/visa/${item.id}`}>
+                                <div class="recent-info">
+                                    <h3>{item.data.title}</h3>
+                                    <div class="recent-meta">
+                                        <span class="recent-category">{item.data.category}</span>
+                                        <span class="recent-date">{typeof item.data.date === 'object' ? item.data.date.toISOString().split('T')[0] : item.data.date}</span>
+                                    </div>
+                                </div>
+                                <span class="recent-arrow">→</span>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <div class="empty-recent">
+                    <p>暂无数据，等待爬虫运行...</p>
+                </div>
+            )}
+            <a href="/visa" class="view-all">查看全部 →</a>
+        </section>
+
+        <section id="about" class="about-section">
+            <h2>关于本项目</h2>
+            <div class="about-content">
+                <div class="about-card">
+                    <div class="about-icon">🕷️</div>
+                    <h3>自动采集</h3>
+                    <p>使用 Crawlee 框架定时爬取官方网站，确保信息及时更新</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">📄</div>
+                    <h3>官方来源</h3>
+                    <p>数据直接来源于各国政府官网，保留原文链接便于查证</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">🔔</div>
+                    <h3>及时提醒</h3>
+                    <p>政策变化自动更新，帮助您快速了解最新签证要求</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="disclaimer-section">
+            <div class="disclaimer-box">
+                <h3>⚠️ 免责声明</h3>
+                <ul>
+                    <li>本网站内容由爬虫程序自动采集，仅供参考</li>
+                    <li>签证政策请以各国官方发布为准</li>
+                    <li>采集频率受限于官方网站限制，信息可能存在延迟</li>
+                    <li>本网站不提供任何签证代办服务或法律建议</li>
+                </ul>
+            </div>
+        </section>
+    </div>
 </Layout>
+
+<style>
+    .homepage {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        color: white;
+        padding: 4rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-content p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background-color: white;
+        color: #3b82f6;
+        padding: 0.875rem 1.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #f3f4f6;
+    }
+
+    .btn-secondary {
+        border: 2px solid white;
+        color: white;
+        padding: 0.875rem 1.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        opacity: 0.8;
+    }
+
+    .recent-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .recent-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: #1a1a2e;
+    }
+
+    .recent-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .recent-item {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s;
+    }
+
+    .recent-item:hover {
+        background-color: #f9fafb;
+    }
+
+    .recent-item a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .recent-info h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+
+    .recent-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .recent-category {
+        color: #3b82f6;
+        font-weight: 500;
+    }
+
+    .recent-arrow {
+        font-size: 1.25rem;
+        color: #9ca3af;
+    }
+
+    .empty-recent {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        color: #6b7280;
+    }
+
+    .view-all {
+        display: inline-block;
+        margin-top: 1rem;
+        color: #3b82f6;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .view-all:hover {
+        text-decoration: underline;
+    }
+
+    .about-section {
+        background-color: #f9fafb;
+        padding: 3rem 2rem;
+    }
+
+    .about-section h2 {
+        text-align: center;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        color: #1a1a2e;
+    }
+
+    .about-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .about-card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .about-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .about-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+        color: #1f2937;
+    }
+
+    .about-card p {
+        color: #6b7280;
+        line-height: 1.6;
+    }
+
+    .disclaimer-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .disclaimer-box {
+        background-color: #fff1f2;
+        border-radius: 12px;
+        padding: 2rem;
+        border-left: 4px solid #ef4444;
+    }
+
+    .disclaimer-box h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #991b1b;
+    }
+
+    .disclaimer-box ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .disclaimer-box li {
+        padding: 0.5rem 0;
+        color: #991b1b;
+        padding-left: 1.25rem;
+        position: relative;
+    }
+
+    .disclaimer-box li::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+        .hero {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .hero-stats {
+            justify-content: center;
+        }
+
+        .about-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
