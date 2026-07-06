@@ -15,198 +15,281 @@ export interface Props {
 }
 
 const { item } = Astro.props;
+
+const countryNames: Record<string, string> = {
+    canada: '🇨🇦 加拿大',
+    usa: '🇺🇸 美国',
+    australia: '🇦🇺 澳大利亚',
+    japan: '🇯🇵 日本',
+    schengen: '🇪🇺 申根区',
+};
+
+const countryColors: Record<string, string> = {
+    canada: 'bg-red-100 text-red-700',
+    usa: 'bg-blue-100 text-blue-700',
+    australia: 'bg-yellow-100 text-yellow-700',
+    japan: 'bg-pink-100 text-pink-700',
+    schengen: 'bg-purple-100 text-purple-700',
+};
 ---
 
 <Layout title={item.data.title}>
-    <article class="visa-detail">
-        <header class="visa-header">
-            <h1>{item.data.title}</h1>
-            <div class="visa-meta">
-                <span class="category">{item.data.category}</span>
+    <article class="detail-page">
+        <header class="detail-header">
+            <div class="header-badges">
+                <span class={`country-badge ${countryColors[item.data.country] || 'bg-gray-100 text-gray-700'}`}>
+                    {countryNames[item.data.country] || item.data.country}
+                </span>
+                <span class="category-badge">{item.data.category}</span>
                 {item.data.language && (
-                    <span class={`lang lang-${item.data.language}`}>
+                    <span class={`language-badge ${item.data.language === 'zh' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
                         {item.data.language === 'zh' ? '中文' : 'English'}
                     </span>
                 )}
-                <span class="date">{typeof item.data.date === 'object' ? item.data.date.toISOString().split('T')[0] : item.data.date}</span>
-                <span class="source">{item.data.source}</span>
+            </div>
+            <h1 class="detail-title">{item.data.title}</h1>
+            <div class="header-meta">
+                <span class="meta-item">
+                    <span class="meta-icon">📅</span>
+                    {typeof item.data.date === 'object'
+                        ? item.data.date.toISOString().split('T')[0]
+                        : item.data.date}
+                </span>
+                <span class="meta-item">
+                    <span class="meta-icon">🏛️</span>
+                    {item.data.source}
+                </span>
             </div>
         </header>
 
         {item.data.summary && (
-            <div class="summary">
-                <strong>摘要:</strong> {item.data.summary}
-            </div>
+            <section class="summary-section">
+                <h2 class="section-label">摘要</h2>
+                <p class="summary-text">{item.data.summary}</p>
+            </section>
         )}
 
-        <div class="visa-content">
-            {item.body}
-        </div>
-
-        <footer class="visa-footer">
-            <div class="disclaimer">
-                <p>⚠️ <strong>免责声明:</strong> 本页面内容由爬虫自动采集，仅供参考。签证政策请以官方发布为准。</p>
+        <section class="content-section">
+            <h2 class="section-label">详细内容</h2>
+            <div class="content-body">
+                {item.body}
             </div>
-            <div class="source-link">
-                <a href={item.data.url} target="_blank" rel="noopener noreferrer">
-                    📎 查看原文（加拿大政府官网）
-                </a>
+        </section>
+
+        <section class="source-section">
+            <a href={item.data.url} target="_blank" rel="noopener noreferrer" class="source-button">
+                <span class="button-icon">📎</span>
+                <span class="button-text">查看原文（{countryNames[item.data.country] || item.data.country}）</span>
+            </a>
+        </section>
+
+        <footer class="detail-footer">
+            <div class="disclaimer-card">
+                <div class="disclaimer-icon">⚠️</div>
+                <div class="disclaimer-content">
+                    <h3 class="disclaimer-title">重要声明</h3>
+                    <p class="disclaimer-text">
+                        本页面内容由爬虫自动采集，仅供参考使用。签证政策请以各国驻华使领馆及政府官方发布的最新信息为准。如有疑问，请咨询官方渠道或专业签证机构。
+                    </p>
+                </div>
             </div>
         </footer>
     </article>
 </Layout>
 
 <style>
-    .visa-detail {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    :root {
+        --primary-color: #FF385C;
+        --primary-hover: #E61E4D;
+        --text-primary: #222222;
+        --text-secondary: #6B6B6B;
+        --text-muted: #999999;
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #F7F7F7;
+        --border-color: #EBEBEB;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+        --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
     }
 
-    .visa-header h1 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: #1a1a2e;
+    .detail-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 32px 24px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .detail-header {
+        margin-bottom: 32px;
+    }
+
+    .header-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .country-badge,
+    .category-badge,
+    .language-badge {
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .category-badge {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .detail-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 16px 0;
         line-height: 1.3;
     }
 
-    .visa-meta {
+    .header-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
+        gap: 16px;
+        color: var(--text-secondary);
+        font-size: 14px;
     }
 
-    .visa-meta span {
-        padding: 0.375rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
-    .category {
-        background-color: #3b82f6;
-        color: white;
+    .meta-icon {
+        font-size: 16px;
     }
 
-    .date {
-        background-color: #f3f4f6;
-        color: #374151;
+    .section-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 0 12px 0;
     }
 
-    .source {
-        background-color: #10b981;
-        color: white;
+    .summary-section {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 32px;
     }
 
-    .lang {
+    .summary-text {
+        font-size: 16px;
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .content-section {
+        margin-bottom: 32px;
+    }
+
+    .content-body {
+        font-size: 16px;
+        color: var(--text-primary);
+        line-height: 1.8;
+    }
+
+    .content-body p {
+        margin: 0 0 16px 0;
+    }
+
+    .content-body p:last-child {
+        margin-bottom: 0;
+    }
+
+    .content-body strong {
+        color: var(--text-primary);
         font-weight: 600;
     }
 
-    .lang-en {
-        background-color: #f3f4f6;
-        color: #374151;
+    .source-section {
+        margin-bottom: 32px;
     }
 
-    .lang-zh {
-        background-color: #dcfce7;
-        color: #166534;
-    }
-
-    .summary {
-        background-color: #fef3c7;
-        border-left: 4px solid #f59e0b;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-        color: #92400e;
-    }
-
-    .visa-content {
-        line-height: 1.8;
-        color: #374151;
-        font-size: 1.05rem;
-    }
-
-    .visa-content p {
-        margin-bottom: 1rem;
-    }
-
-    .visa-content h2 {
-        font-size: 1.5rem;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-        color: #1f2937;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 0.5rem;
-    }
-
-    .visa-content h3 {
-        font-size: 1.25rem;
-        margin-top: 1.5rem;
-        margin-bottom: 0.75rem;
-        color: #374151;
-    }
-
-    .visa-content ul, .visa-content ol {
-        padding-left: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .visa-content li {
-        margin-bottom: 0.5rem;
-    }
-
-    .visa-content a {
-        color: #3b82f6;
-        text-decoration: none;
-    }
-
-    .visa-content a:hover {
-        text-decoration: underline;
-    }
-
-    .visa-footer {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-    }
-
-    .disclaimer {
-        background-color: #fff1f2;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        color: #991b1b;
-        font-size: 0.9rem;
-    }
-
-    .source-link a {
+    .source-button {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        background-color: #3b82f6;
+        gap: 10px;
+        background: var(--primary-color);
         color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
+        padding: 14px 24px;
+        border-radius: var(--radius-md);
         text-decoration: none;
-        transition: background-color 0.2s;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
     }
 
-    .source-link a:hover {
-        background-color: #2563eb;
+    .source-button:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-icon {
+        font-size: 18px;
+    }
+
+    .detail-footer {
+        margin-top: 48px;
+    }
+
+    .disclaimer-card {
+        background: #FFFBEB;
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        display: flex;
+        gap: 14px;
+        border: 1px solid #FEF3C7;
+    }
+
+    .disclaimer-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .disclaimer-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #92400E;
+        margin: 0 0 6px 0;
+    }
+
+    .disclaimer-text {
+        font-size: 14px;
+        color: #78350F;
+        line-height: 1.5;
+        margin: 0;
     }
 
     @media (max-width: 768px) {
-        .visa-detail {
-            padding: 1rem;
+        .detail-page {
+            padding: 24px 16px;
         }
 
-        .visa-header h1 {
-            font-size: 1.5rem;
+        .detail-title {
+            font-size: 24px;
         }
 
-        .visa-meta {
+        .disclaimer-card {
             flex-direction: column;
         }
     }

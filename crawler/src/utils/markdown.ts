@@ -26,9 +26,10 @@ const CONTENT_DIR = path.join(__dirname, '../../../src/content/visa');
 /**
  * 签证条目数据结构（与爬虫中定义一致）
  */
-interface VisaItem {
+export interface VisaItem {
     url: string;       // 原文 URL
     title: string;     // 页面标题
+    country: string;   // 国家代码 (canada/usa/australia/japan/schengen)
     category: string;  // 分类
     summary: string;   // 摘要
     content: string;   // 正文
@@ -76,6 +77,7 @@ function generateMarkdown(item: VisaItem): string {
     const frontmatterLines = [
         `title: ${escapeYamlString(item.title)}`,
         `url: ${escapeYamlString(item.url)}`,
+        `country: ${item.country}`,
         `category: ${escapeYamlString(item.category)}`,
         `source: ${escapeYamlString(item.source)}`,
         `date: "${item.date}"`,
@@ -143,39 +145,77 @@ function escapeYamlString(str: string): string {
 /**
  * 将 Dataset 数据批量写入 Markdown 文件
  *
+ * 按国家分子目录存储，文件命名包含国家前缀避免冲突
+ *
  * @param items - 签证条目数组
+ * @param options - 配置选项
+ * @param options.clearOld - 是否清除旧文件（按国家清除）
  */
-export async function createMarkdownFiles(items: VisaItem[]) {
-    // 确保输出目录存在
-    if (!fs.existsSync(CONTENT_DIR)) {
-        fs.mkdirSync(CONTENT_DIR, { recursive: true });
-        console.log(`📁 创建目录: ${CONTENT_DIR}`);
-    }
+export async function createMarkdownFiles(items: VisaItem[], options: { clearOld?: boolean } = {}) {
+    const { clearOld = false } = options;
 
-    // 用于统计和去重
-    let writtenCount = 0;
-    let skippedCount = 0;
-    const seenUrls = new Set<string>();
-
+    // 按国家分组
+    const itemsByCountry = new Map<string, VisaItem[]>();
     for (const item of items) {
-        // 按 URL 去重
-        if (seenUrls.has(item.url)) {
-            skippedCount++;
-            continue;
+        const country = item.country || 'unknown';
+        if (!itemsByCountry.has(country)) {
+            itemsByCountry.set(country, []);
         }
-        seenUrls.add(item.url);
-
-        const filename = `${sanitizeFilename(item.title)}.md`;
-        const filePath = path.join(CONTENT_DIR, filename);
-        const markdown = generateMarkdown(item);
-
-        fs.writeFileSync(filePath, markdown, 'utf-8');
-        writtenCount++;
-        console.log(`  📄 [${item.category}] ${item.title.slice(0, 50)}...`);
+        itemsByCountry.get(country)!.push(item);
     }
 
-    console.log(`\n  ✅ 共生成 ${writtenCount} 个 Markdown 文件`);
-    if (skippedCount > 0) {
-        console.log(`  ℹ️  跳过重复: ${skippedCount} 条`);
+    let totalWritten = 0;
+    let totalSkipped = 0;
+
+    for (const [country, countryItems] of itemsByCountry) {
+        const countryDir = path.join(CONTENT_DIR, country);
+
+        // 确保国家目录存在
+        if (!fs.existsSync(countryDir)) {
+            fs.mkdirSync(countryDir, { recursive: true });
+            console.log(`📁 创建目录: ${countryDir}`);
+        }
+
+        // 如果需要清除旧文件
+        if (clearOld) {
+            const oldFiles = fs.readdirSync(countryDir).filter(f => f.endsWith('.md'));
+            for (const f of oldFiles) {
+                fs.unlinkSync(path.join(countryDir, f));
+            }
+            console.log(`🗑️  清除旧文件: ${country} (${oldFiles.length} 个)`);
+        }
+
+        const seenUrls = new Set<string>();
+        let writtenCount = 0;
+        let skippedCount = 0;
+
+        for (const item of countryItems) {
+            // 按 URL 去重
+            if (seenUrls.has(item.url)) {
+                skippedCount++;
+                continue;
+            }
+            seenUrls.add(item.url);
+
+            const filename = `${country}-${sanitizeFilename(item.title)}.md`;
+            const filePath = path.join(countryDir, filename);
+            const markdown = generateMarkdown(item);
+
+            fs.writeFileSync(filePath, markdown, 'utf-8');
+            writtenCount++;
+            console.log(`  📄 [${country}] [${item.category}] ${item.title.slice(0, 50)}...`);
+        }
+
+        console.log(`\n  ✅ ${country}: 生成 ${writtenCount} 个 Markdown 文件`);
+        if (skippedCount > 0) {
+            console.log(`  ℹ️  ${country}: 跳过重复: ${skippedCount} 条`);
+        }
+
+        totalWritten += writtenCount;
+        totalSkipped += skippedCount;
     }
+
+    console.log(`\n========================================`);
+    console.log(`  📊 总计: 生成 ${totalWritten} 个文件，跳过 ${totalSkipped} 个重复`);
+    console.log(`========================================`);
 }

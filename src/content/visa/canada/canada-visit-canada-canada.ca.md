@@ -1,0 +1,17 @@
+﻿---
+title: Visit Canada - Canada.ca
+country: canada
+url: "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html"
+category: 访客签证
+source: 加拿大政府官网 (IRCC)
+date: "2026-07-03"
+summary: Check if you need a visa or electronic travel authorization (eTA) to travel to Canada, to visit family or to visit on business. Find out about transiting through Canada to another destination and extending your stay.
+language: en
+---
+
+Visit Canada Check if you need a visa or electronic travel authorization (eTA) to travel to Canada, to visit family or to visit on business. Find out about transiting through Canada to another destination and extending your stay. function docReady(fn) { // see if DOM is already available if (document.readyState === "complete" || document.readyState === "interactive") { // call on next available tick setTimeout(fn, 1); } else { document.addEventListener("DOMContentLoaded", fn); } } docReady(function() { let cssScript = document.createElement('link'); cssScript.setAttribute('href', 'https://ircc.canada.ca/css/templates/banded-topic.css'); cssScript.setAttribute('rel', 'stylesheet'); cssScript.setAttribute('type', 'text/css'); document.head.appendChild(cssScript); }) (function injectCSS() { const css = ` .fifa-band{ background-color: #E7E6F9 !important; } `; const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style); })(); FIFA World Cup 2026™ – Find out what you need to travel to Canada Apply early Most requested Sign in to your IRCC account Check your application status Check processing times Before you apply Answer a few questions and we’ll tell you what you need to travel to Canada: an electronic travel authorization (eTA) or a visa. Check if you need an eTA or visa Apply for a visitor visa or eTA Visitor visa What is a visitor visa, who can apply, how to apply and how to prepare for your arrival in Canada Electronic travel authorization (eTA) What is an eTA, who can apply, how to apply and how to prepare for your arrival in Canada Visas for specific types of visits Transit visas: travel through Canada by air Super visas: visit your children or grandchildren for up to 5 years Business visitors: meetings, conferences and trade shows After you arrive in Canada Visitor records: extend your stay as a visitor Who can get a visitor record, what it is and how to apply Students and workers: apply for a new visitor visa Get a new visitor visa from inside Canada if yours is expired and you’re planning on leaving Canada and returning For Canadian business and event organizers Bring foreign business guests to Canada What you need to do as a business or event organizer, how to register your event and prepare letters of invitation At the border Border information for visitors to Canada Travel tips, what happens at the border and prohibited or restricted goods Explore immigration programs Answer a few questions to see different ways you might be able to come to Canada (function injectCSS() { const css = ` .rnd-brdr { border-radius: 20px; } `; const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style); })(); Page details 2025-12-03
+
+---
+
+**原文链接**: [https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html](https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html)  
+**采集时间**: 2026/7/3 19:17:27

@@ -369,6 +369,7 @@ function extractContentCheerio($: any, url: string, fallbackCategory: string) {
         const visaItem: VisaItem = {
             url,
             title: title.replace(/\s+/g, ' ').trim(),
+            country: 'canada',
             category,
             summary,
             content: content.slice(0, 10000),

@@ -1,76 +1,67 @@
-name: 签证政策爬虫与构建
+name: Crawl and Deploy
 
 on:
   schedule:
+    # 每天 UTC 时间 8:00 运行（北京时间 16:00）
     - cron: '0 8 * * *'
-  workflow_dispatch:
+  workflow_dispatch:  # 支持手动触发
 
 jobs:
   crawl-and-build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-
     steps:
-      - name: 检出代码
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: 设置 Node.js 环境
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
-          cache: 'npm'
+          node-version: '20'
 
-      - name: 安装 npm 依赖
+      - name: Install root dependencies
         run: npm ci
 
-      - name: 安装 Playwright Chromium 浏览器
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
 
-      - name: 运行签证爬虫
+      - name: Install crawler dependencies
+        run: |
+          cd crawler
+          npm ci
+
+      - name: Run crawlers
         run: npm run crawl
         env:
-          NODE_ENV: production
+          CRAWLER_ENGINE: playwright
 
-      - name: 检查是否有数据更新
-        id: check_changes
+      - name: Check for data changes
+        id: git-diff
         run: |
-          if git diff --name-only | grep -q "src/content/visa/"; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "发现数据变更"
+          git diff --exit-code src/content/ > /dev/null
+          if [ $? -eq 1 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Data changed, will build and deploy"
           else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "无数据变更"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No data changes, skipping build and deploy"
           fi
 
-      - name: 构建网站
+      - name: Build Astro site
+        if: steps.git-diff.outputs.changed == 'true'
         run: npm run build
 
-      - name: 提交新数据到仓库
-        if: steps.check_changes.outputs.has_changes == 'true'
+      - name: Commit data changes
+        if: steps.git-diff.outputs.changed == 'true'
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add src/content/visa/
-          git commit -m "chore: 更新加拿大签证政策数据"
+          git commit -m "chore: 自动更新签证政策数据 $(date +'%Y-%m-%d')"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 配置 Pages
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: actions/configure-pages@v5
-
-      - name: 上传构建产物
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to GitHub Pages
+        if: steps.git-diff.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./dist
-
-      - name: 部署到 GitHub Pages
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist

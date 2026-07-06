@@ -12,64 +12,101 @@ const sortedItems = [...visaItems].sort((a, b) => {
     return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
 });
 
+const countries = [...new Set(sortedItems.map(item => item.data.country))];
 const categories = [...new Set(sortedItems.map(item => item.data.category))];
+
+const countryNames: Record<string, string> = {
+    canada: '🇨🇦 加拿大',
+    usa: '🇺🇸 美国',
+    australia: '🇦🇺 澳大利亚',
+    japan: '🇯🇵 日本',
+    schengen: '🇪🇺 申根区',
+};
+
+const countryColors: Record<string, string> = {
+    canada: 'bg-red-100 text-red-700',
+    usa: 'bg-blue-100 text-blue-700',
+    australia: 'bg-yellow-100 text-yellow-700',
+    japan: 'bg-pink-100 text-pink-700',
+    schengen: 'bg-purple-100 text-purple-700',
+};
 ---
 
-<Layout title="签证政策 - 加拿大">
-    <div class="visa-list">
+<Layout title="签证政策 - 全球">
+    <div class="page-container">
         <header class="page-header">
-            <h1>加拿大签证政策</h1>
-            <p>自动采集自加拿大政府官网，及时了解最新签证动态</p>
+            <h1 class="header-title">签证政策</h1>
+            <p class="header-subtitle">探索全球各国最新签证信息</p>
         </header>
 
-        <div class="disclaimer-banner">
-            <p>⚠️ <strong>重要提示:</strong> 本网站内容仅供参考，签证政策请以加拿大政府官方发布为准。</p>
+        <div class="filter-bar">
+            <div class="filter-group">
+                <span class="filter-label">国家/地区</span>
+                <div class="filter-options">
+                    <button class="filter-chip active" data-filter="country" data-value="all">全部</button>
+                    {countries.map(country => (
+                        <button class="filter-chip" data-filter="country" data-value={country}>
+                            {countryNames[country]}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <div class="filter-divider"></div>
+            <div class="filter-group">
+                <span class="filter-label">签证类型</span>
+                <div class="filter-options">
+                    <button class="filter-chip active" data-filter="category" data-value="all">全部</button>
+                    {categories.map(cat => (
+                        <button class="filter-chip" data-filter="category" data-value={cat}>{cat}</button>
+                    ))}
+                </div>
+            </div>
         </div>
 
-        <div class="filter-section">
-            <span class="filter-label">分类:</span>
-            <button class="filter-btn active" data-category="all">全部</button>
-            {categories.map(cat => (
-                <button class="filter-btn" data-category={cat}>{cat}</button>
-            ))}
+        <div class="stats-bar">
+            <span class="stats-text">共 <strong>{sortedItems.length}</strong> 条政策信息</span>
         </div>
 
-        <div class="stats">
-            <span>共 <strong>{sortedItems.length}</strong> 条政策信息</span>
-        </div>
-
-        <ul class="items-container">
+        <div class="cards-grid">
             {sortedItems.map(item => (
-                <li class="visa-card" data-category={item.data.category}>
-                    <a href={`/visa/${item.id}`}>
-                        <div class="card-header">
-                            <span class="category-tag">{item.data.category}</span>
-                            <div class="header-right">
-                                {item.data.language && (
-                                    <span class={`lang-tag lang-${item.data.language}`}>
-                                        {item.data.language === 'zh' ? '中文' : 'EN'}
-                                    </span>
-                                )}
-                                <span class="date-tag">{typeof item.data.date === 'object' ? item.data.date.toISOString().split('T')[0] : item.data.date}</span>
-                            </div>
+                <article class="visa-card" data-country={item.data.country} data-category={item.data.category}>
+                    <a href={`/visa/${item.id}`} class="card-link">
+                        <div class="card-badge">
+                            <span class={`country-tag ${countryColors[item.data.country] || 'bg-gray-100 text-gray-700'}`}>
+                                {countryNames[item.data.country] || item.data.country}
+                            </span>
+                            {item.data.language && (
+                                <span class={`language-tag ${
+                                    item.data.language === 'zh' ? 'bg-green-100 text-green-700' :
+                                    item.data.language === 'ja' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                    {item.data.language === 'zh' ? '中文' : item.data.language === 'ja' ? '日本語' : 'EN'}
+                                </span>
+                            )}
                         </div>
-                        <h3 class="card-title">{item.data.title}</h3>
+                        <h2 class="card-title">{item.data.title}</h2>
                         {item.data.summary && (
                             <p class="card-summary">{item.data.summary}</p>
                         )}
-                        <div class="card-footer">
-                            <span class="source">{item.data.source}</span>
-                            <span class="read-more">阅读更多 →</span>
+                        <div class="card-meta">
+                            <span class="category-tag">{item.data.category}</span>
+                            <span class="date-tag">
+                                {typeof item.data.date === 'object'
+                                    ? item.data.date.toISOString().split('T')[0]
+                                    : item.data.date}
+                            </span>
                         </div>
                     </a>
-                </li>
+                </article>
             ))}
-        </ul>
+        </div>
 
         {sortedItems.length === 0 && (
             <div class="empty-state">
-                <p>暂无签证政策信息，请稍后再试。</p>
-                <button onclick="window.location.reload()">刷新页面</button>
+                <div class="empty-icon">🔍</div>
+                <p class="empty-title">暂无签证政策信息</p>
+                <p class="empty-subtitle">请稍后再试，或尝试调整筛选条件</p>
+                <button class="empty-button" onclick="window.location.reload()">刷新页面</button>
             </div>
         )}
     </div>
@@ -77,178 +114,259 @@ const categories = [...new Set(sortedItems.map(item => item.data.category))];
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const filterChips = document.querySelectorAll('.filter-chip');
         const cards = document.querySelectorAll('.visa-card');
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        let activeCountry = 'all';
+        let activeCategory = 'all';
 
-                const category = btn.dataset.category;
+        function applyFilters() {
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const countryMatch = activeCountry === 'all' || card.dataset.country === activeCountry;
+                const categoryMatch = activeCategory === 'all' || card.dataset.category === activeCategory;
+                card.style.display = countryMatch && categoryMatch ? 'block' : 'none';
+                if (countryMatch && categoryMatch) visibleCount++;
+            });
+            
+            const statsEl = document.querySelector('.stats-text');
+            if (statsEl) {
+                statsEl.innerHTML = `共 <strong>${cards.length}</strong> 条政策信息，当前显示 <strong>${visibleCount}</strong> 条`;
+            }
+        }
 
-                cards.forEach(card => {
-                    if (category === 'all' || card.dataset.category === category) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+        function updateHash() {
+            const params = new URLSearchParams();
+            if (activeCountry !== 'all') params.set('country', activeCountry);
+            if (activeCategory !== 'all') params.set('category', activeCategory);
+            const hash = params.toString();
+            window.location.hash = hash ? `#${hash}` : '';
+        }
+
+        function setFilter(filterType, value) {
+            document.querySelectorAll(`.filter-chip[data-filter="${filterType}"]`)
+                .forEach(b => b.classList.remove('active'));
+            const targetChip = document.querySelector(`.filter-chip[data-filter="${filterType}"][data-value="${value}"]`);
+            if (targetChip) targetChip.classList.add('active');
+
+            if (filterType === 'country') {
+                activeCountry = value || 'all';
+            } else {
+                activeCategory = value || 'all';
+            }
+
+            applyFilters();
+            updateHash();
+        }
+
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const filterType = chip.dataset.filter;
+                const value = chip.dataset.value;
+                setFilter(filterType, value);
             });
         });
+
+        function parseHash() {
+            const hash = window.location.hash.slice(1);
+            if (!hash) return;
+            try {
+                const params = new URLSearchParams(hash);
+                const country = params.get('country');
+                const category = params.get('category');
+                if (country) {
+                    activeCountry = country;
+                    const countryChip = document.querySelector(`.filter-chip[data-filter="country"][data-value="${country}"]`);
+                    if (countryChip) countryChip.classList.add('active');
+                    document.querySelector('.filter-chip[data-filter="country"][data-value="all"]')?.classList.remove('active');
+                }
+                if (category) {
+                    activeCategory = category;
+                    const categoryChip = document.querySelector(`.filter-chip[data-filter="category"][data-value="${category}"]`);
+                    if (categoryChip) categoryChip.classList.add('active');
+                    document.querySelector('.filter-chip[data-filter="category"][data-value="all"]')?.classList.remove('active');
+                }
+                applyFilters();
+            } catch (e) {
+                console.error('解析 hash 参数失败:', e);
+            }
+        }
+
+        parseHash();
+        window.addEventListener('hashchange', parseHash);
     });
 </script>
 
 <style>
-    .visa-list {
-        max-width: 1200px;
+    :root {
+        --primary-color: #FF385C;
+        --primary-hover: #E61E4D;
+        --text-primary: #222222;
+        --text-secondary: #6B6B6B;
+        --text-muted: #999999;
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #F7F7F7;
+        --border-color: #EBEBEB;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+        --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+        --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+    }
+
+    .page-container {
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 2rem;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--bg-secondary);
+        min-height: calc(100vh - 80px);
     }
 
     .page-header {
+        margin-bottom: 32px;
         text-align: center;
-        margin-bottom: 2rem;
     }
 
-    .page-header h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        color: #1a1a2e;
+    .header-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
     }
 
-    .page-header p {
-        font-size: 1.1rem;
-        color: #6b7280;
+    .header-subtitle {
+        font-size: 16px;
+        color: var(--text-secondary);
+        margin: 0;
     }
 
-    .disclaimer-banner {
-        background-color: #fff1f2;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
-        color: #991b1b;
-        font-size: 0.95rem;
-    }
-
-    .filter-section {
+    .filter-bar {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: 16px 24px;
+        margin-bottom: 24px;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
         align-items: center;
+        gap: 24px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-width: 200px;
     }
 
     .filter-label {
+        font-size: 14px;
         font-weight: 600;
-        color: #374151;
+        color: var(--text-primary);
     }
 
-    .filter-btn {
-        padding: 0.5rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        background-color: white;
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-chip {
+        padding: 8px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        background: var(--bg-primary);
+        font-size: 14px;
+        color: var(--text-secondary);
         cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.9rem;
+        transition: all 0.2s ease;
     }
 
-    .filter-btn:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
+    .filter-chip:hover {
+        border-color: var(--text-primary);
+        color: var(--text-primary);
     }
 
-    .filter-btn.active {
-        background-color: #3b82f6;
+    .filter-chip.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
         color: white;
-        border-color: #3b82f6;
     }
 
-    .stats {
-        margin-bottom: 1.5rem;
-        color: #6b7280;
-        font-size: 0.95rem;
+    .filter-chip.active:hover {
+        background: var(--primary-hover);
+        border-color: var(--primary-hover);
     }
 
-    .items-container {
-        list-style: none;
-        padding: 0;
+    .filter-divider {
+        width: 1px;
+        height: 40px;
+        background: var(--border-color);
+    }
+
+    .stats-bar {
+        margin-bottom: 24px;
+    }
+
+    .stats-text {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .stats-text strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
     }
 
     .visa-card {
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .visa-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
     }
 
-    .visa-card a {
+    .card-link {
+        display: block;
+        padding: 20px;
         text-decoration: none;
         color: inherit;
-        display: block;
-        padding: 1.5rem;
     }
 
-    .card-header {
+    .card-badge {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
+        gap: 8px;
+        margin-bottom: 12px;
     }
 
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .lang-tag {
-        padding: 0.2rem 0.5rem;
+    .country-tag,
+    .language-tag {
+        padding: 4px 12px;
         border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .lang-en {
-        background-color: #f3f4f6;
-        color: #374151;
-    }
-
-    .lang-zh {
-        background-color: #dcfce7;
-        color: #166534;
-    }
-
-    .category-tag {
-        padding: 0.25rem 0.75rem;
-        background-color: #3b82f6;
-        color: white;
-        border-radius: 4px;
-        font-size: 0.8rem;
+        font-size: 12px;
         font-weight: 500;
     }
 
-    .date-tag {
-        font-size: 0.85rem;
-        color: #6b7280;
-    }
-
     .card-title {
-        font-size: 1.15rem;
-        margin-bottom: 0.75rem;
-        color: #1f2937;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
         line-height: 1.4;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -257,68 +375,103 @@ const categories = [...new Set(sortedItems.map(item => item.data.category))];
     }
 
     .card-summary {
-        font-size: 0.9rem;
-        color: #6b7280;
-        line-height: 1.6;
-        margin-bottom: 1rem;
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0 0 12px 0;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    .card-footer {
+    .card-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 1rem;
-        border-top: 1px solid #f3f4f6;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
     }
 
-    .source {
-        font-size: 0.85rem;
-        color: #10b981;
+    .category-tag {
+        padding: 4px 12px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
         font-weight: 500;
     }
 
-    .read-more {
-        font-size: 0.85rem;
-        color: #3b82f6;
-        font-weight: 500;
+    .date-tag {
+        font-size: 12px;
+        color: var(--text-muted);
     }
 
     .empty-state {
         text-align: center;
-        padding: 4rem;
-        color: #6b7280;
+        padding: 80px 24px;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
     }
 
-    .empty-state button {
-        margin-top: 1rem;
-        padding: 0.75rem 1.5rem;
-        background-color: #3b82f6;
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .empty-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin: 0 0 24px 0;
+    }
+
+    .empty-button {
+        padding: 12px 24px;
+        background: var(--primary-color);
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
-        font-size: 1rem;
+        transition: background 0.2s;
     }
 
-    .empty-state button:hover {
-        background-color: #2563eb;
+    .empty-button:hover {
+        background: var(--primary-hover);
     }
 
     @media (max-width: 768px) {
-        .visa-list {
-            padding: 1rem;
+        .page-container {
+            padding: 16px;
         }
 
-        .page-header h1 {
-            font-size: 1.8rem;
+        .header-title {
+            font-size: 24px;
         }
 
-        .items-container {
+        .filter-bar {
+            padding: 16px;
+        }
+
+        .filter-divider {
+            display: none;
+        }
+
+        .cards-grid {
             grid-template-columns: 1fr;
+        }
+
+        .card-link {
+            padding: 16px;
         }
     }
 </style>

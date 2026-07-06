@@ -1,0 +1,17 @@
+﻿---
+title: "Post-graduation work permit: About the post-graduation work permit (PGWP) - Canada.ca"
+country: canada
+url: "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/work/after-graduation/about.html"
+category: 学习许可
+source: 加拿大政府官网 (IRCC)
+date: "2026-07-03"
+summary: The post-graduation work permit (PGWP) allows students who have graduated from eligible designated learning institutions (DLIs) to gain valuable Canadian work experience.
+language: en
+---
+
+Post-graduation work permit About the PGWP Who can apply Get the right documents How to apply After you apply About the post-graduation work permit The post-graduation work permit (PGWP) allows students who have graduated from eligible designated learning institutions (DLIs) to gain valuable Canadian work experience. Graduating from a designated learning institution (DLI) doesn’t automatically make you eligible for a PGWP. Check the DLI list to find out which schools have eligible programs. As of November 1, 2024, the eligibility requirements for a PGWP changed. Most PGWP applicants now need to give proof of language results when they apply. If you submitted your PGWP application before November 1, 2024, or are a flight school graduate, you’re exempt from the new requirements. How long is a post-graduation work permit valid? The length of your PGWP depends on the level and duration of your study program, as well as the expiry date of your passport, whichever comes first. For master’s degree programs as of February 15, 2024 You can apply for a 3-year PGWP, even if your master’s program was less than 2 years, as long as your program was at least 8 months (or 900 hours for Quebec programs) and you meet all other eligibility requirements This doesn’t apply to certificate or diploma programs. For all other programs If your program was at least 8 months (or 900 hours for Quebec credentials), but less than 2 years We may give you a PGWP that’s valid for up to the same length as your study program. For example, if you completed a 9-month program, we may give you a work permit for up to 9 months. If your program was 2 years or more We may give you a PGWP that’s valid for 3 years. If you completed more than 1 program You may be able to get a PGWP that combines the length of each program as long as you meet the eligibility requirement for each program. For example, if one of the programs has a higher language requirement, you need to meet the higher requirement to get a PGWP that combines the length of both programs. Each of the programs you completed must be PGWP eligible and at least 8 months (or 900 hours for Quebec credentials) in length You can’t get a PGWP if you already had one after completing an earlier program of study. If your passport expires before your PGWP Make sure your passport is valid for the full length of time you’re eligible for a PGWP before you apply. Your work permit will only be issued for the period your passport is valid. If your passport expires before the full duration of your eligibility, you can apply to extend your PGWP. To extend your PGWP, you must apply on paper after you get a new passport that’s valid for the entire period you’re eligible for the work permit. Document navigation Next: Who can apply Page details 2026-03-09
+
+---
+
+**原文链接**: [https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/work/after-graduation/about.html](https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/work/after-graduation/about.html)  
+**采集时间**: 2026/7/3 19:17:27
